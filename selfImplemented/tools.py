@@ -1,7 +1,6 @@
 import os
-
-from exceptiongroup import catch
 from openai import OpenAI
+from git import Repo
 
 def code_writer(description):
     client = OpenAI()
@@ -37,16 +36,29 @@ def test_writer(code):
     )
     return test_writer_completion.choices[0].message.content
 
-def file_writer(content, path, type):
+def file_writer(content, path, file_type):
     file_name = path
     save_type = ""
-    if path[-2:] != "py" and (type == "python" or type == "py"):
+    if path[-2:] != "py" and (file_type == "python" or file_type == "py"):
         save_type = ".py"
     file_name += save_type
-    files = os.listdir("../generatedCode")
+    files = os.listdir("../../GeneratedCode")
     while file_name in files:
         file_name = file_name[0:-3] +"copy" + save_type
     f = open("../generatedCode/"+file_name, "x")
     f.write(content)
     f.close()
     return "../generatedCode/"+file_name
+
+PATH_OF_GIT_REPO = r'path\to\your\project\folder\.git'  # make sure .git folder is properly configured
+COMMIT_MESSAGE = 'auto generated code'
+
+def git_push():
+    try:
+        repo = Repo(PATH_OF_GIT_REPO)
+        repo.git.add(update=True)
+        repo.index.commit(COMMIT_MESSAGE)
+        origin = repo.remote(name='origin')
+        origin.push()
+    except:
+        print('Some error occured while pushing the code')
