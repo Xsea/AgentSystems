@@ -9,7 +9,7 @@ client = OpenAI()
 tools = [programmerTool, testerTool, fileWriterTool, commitTool]
 
 completionPlan = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-4o",
     tools=tools,
     messages=[
         {"role": "system",
@@ -41,7 +41,7 @@ nextStep = ""
 i = 0
 while nextStep != "STOP!" and i < 10:
     completionStep = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         tools=tools,
         tool_choice='none',
         messages=[
@@ -54,18 +54,15 @@ while nextStep != "STOP!" and i < 10:
              This output might be needed to execute further steps later on
              If this list is empty, no steps have been executed until now.
              Compare the plan and the executed list with each other to determine the next step that needs to be executed. 
-             Should you decide all steps of the plan have been executed (meaning you find a partner to all planned steps
-             in the executed steps and at least more than one step was executed), output:
-             
-             STOP!
-             
-             Otherwise structure your output the following way:
-             
-             NEXT STEP:
-             Recommended Tool: {Your Tool Recommendation}
-             Input: {The input needed. Either determined by you, or use the output of a previous step}
-             
-             
+             Please output your suggestion for a next step in the following valid JSON format with the following way (Read the Text between $$ as explanations of the parameter):
+             {
+                "nextStep": $leave this object null if no step is needed$ {
+                    "recommendedTool": $Your tool recommendation. To determine this look at your available tools$
+                    "Input": $The input needed. Either determined by you, or use the output of a previous step$
+                }
+                "chainOfThoughts": $Your chain of thoughts while solving this tasks. Fill it with your reasoning$
+                "finish": $Boolean parameter, fill with false if you determine there is a next step, false if you determine the task is solved
+             }
              """},
             {
                 "role": "system",
@@ -79,7 +76,11 @@ while nextStep != "STOP!" and i < 10:
     )
     nextStep = completionStep.choices[0].message.content
     print("The next step: ", nextStep + "\n")
-    if nextStep == "STOP!":
+    nextStep = nextStep.removeprefix("```json").removesuffix("```")
+    nextStepParsed = json.loads(nextStep)
+
+    print(nextStepParsed["finish"])
+    if nextStepParsed["finish"]:
         break
 
     completionTool = client.chat.completions.create(
@@ -91,7 +92,7 @@ while nextStep != "STOP!" and i < 10:
              "content": """Read the assistant message below and determine which tool to use to satisfy this task"""},
             {
                 "role": "assistant",
-                "content": nextStep
+                "content": str(nextStepParsed["nextStep"])
             }
         ]
     )
