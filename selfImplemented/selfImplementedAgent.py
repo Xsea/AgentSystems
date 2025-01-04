@@ -1,9 +1,8 @@
 import json
-
 from openai import OpenAI
-
-from selfImplemented.tools import code_writer, file_writer, test_writer
+from selfImplemented.tools import code_writer, file_writer, test_writer, git_push
 from toolsDescription import programmerTool, testerTool, fileWriterTool, commitTool
+
 client = OpenAI()
 
 tools = [programmerTool, testerTool, fileWriterTool, commitTool]
@@ -118,6 +117,7 @@ while nextStep != "STOP!" and i < 10:
         if tool_call.function.name == "git_commit":
             executedSteps += "We used tool git_commit to commit and push the code"
             executedSteps += "\n ********************"
+            git_push()
     i += 1
 
 print(executedSteps + "\n ############ END ##########")
