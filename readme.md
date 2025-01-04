@@ -17,3 +17,5 @@ code was executed.
 Lastly following variables in tools.py need to be set to run properly:
 
 PATH_WHERE_GENERATED_CODE_GOES and PATH_OF_GIT_REPO, COMMIT_MESSAGE if you want the git push functionality
+
+For now, only the self implemented part (without Langchain) is running. Execute selfImplementedAgent.py for the demo
