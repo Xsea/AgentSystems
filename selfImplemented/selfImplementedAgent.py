@@ -7,6 +7,8 @@ client = OpenAI()
 
 tools = [programmerTool, testerTool, fileWriterTool, commitTool]
 
+userRequest = str(input("How can I help you? \n"))
+
 completionPlan = client.chat.completions.create(
     model="gpt-4o",
     tools=tools,
@@ -28,7 +30,7 @@ completionPlan = client.chat.completions.create(
 
         {
             "role": "user",
-            "content": "Write a a method that can add two numbers."
+            "content": userRequest
         }
     ]
 )
@@ -78,7 +80,6 @@ while nextStep != "STOP!" and i < 10:
     nextStep = nextStep.removeprefix("```json").removesuffix("```")
     nextStepParsed = json.loads(nextStep)
 
-    print(nextStepParsed["finish"])
     if nextStepParsed["finish"]:
         break
 

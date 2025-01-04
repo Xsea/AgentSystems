@@ -56,12 +56,10 @@ def file_writer(content, path, file_type):
 
 def git_push():
     try:
-        print("trying")
         repo = Repo(PATH_OF_GIT_REPO)
         repo.git.add(".")
         repo.index.commit(COMMIT_MESSAGE)
         origin = repo.remote(name='origin')
         origin.push()
-        print("done")
     except:
         print('Some error occured while pushing the code')
