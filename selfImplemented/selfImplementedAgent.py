@@ -5,10 +5,12 @@ from toolsDescription import programmerTool, testerTool, fileWriterTool, commitT
 
 client = OpenAI()
 
+# which tools does our LLM have access to
 tools = [programmerTool, testerTool, fileWriterTool, commitTool]
 
 userRequest = str(input("How can I help you? \n"))
 
+# read user input and devise a plan on how to solve it
 completionPlan = client.chat.completions.create(
     model="gpt-4o",
     tools=tools,
@@ -37,10 +39,11 @@ completionPlan = client.chat.completions.create(
 
 thePlan = completionPlan.choices[0].message.content
 print("########## THE PLAN ############ \n" + thePlan + "\n ############ END PLAN ########## \n")
+
 executedSteps = "########## EXECUTED STEPS ############"
-nextStep = ""
 i = 0
-while nextStep != "STOP!" and i < 10:
+while i < 10:
+    # we start by analyzing the plan and the executed steps -> this will determine the next step
     completionStep = client.chat.completions.create(
         model="gpt-4o",
         tools=tools,
@@ -77,12 +80,17 @@ while nextStep != "STOP!" and i < 10:
     )
     nextStep = completionStep.choices[0].message.content
     print("The next step: ", nextStep + "\n")
+
+    # sometimes the LLM creates a valid json, but starts with the annotation ```json then {} and ends with ```
     nextStep = nextStep.removeprefix("```json").removesuffix("```")
     nextStepParsed = json.loads(nextStep)
 
+    # we are done - lets get out
     if nextStepParsed["finish"]:
         break
 
+    # now we use the determined next plan and execute the tool - needs separation as text generation and tool call can
+    # not be done simultaneously
     completionTool = client.chat.completions.create(
         model="gpt-4o-mini",
         tools=tools,
@@ -97,6 +105,8 @@ while nextStep != "STOP!" and i < 10:
         ]
     )
 
+    # save what we have done - this is our short term memory.
+    # The LLM will use this to determine what has been done and what needs to be done next
     if completionTool.choices[0].finish_reason == 'tool_calls':
         tool_call = completionTool.choices[0].message.tool_calls[0]
         arguments = json.loads(tool_call.function.arguments)
