@@ -45,9 +45,9 @@ fileWriterTool = {
         "parameters": {
             "type": "object",
             "properties": {
-                "path": {
+                "fileName": {
                     "type": "string",
-                    "description": """Where the file should be saved""",
+                    "description": """The name of the file""",
                 },
                 "fileType": {
                     "type": "string",

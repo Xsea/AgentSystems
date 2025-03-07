@@ -1,8 +1,3 @@
-.idea/AgentSystem.iml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/.gitignore
+.idea/*
 .DS_Store
 */__pycache__
